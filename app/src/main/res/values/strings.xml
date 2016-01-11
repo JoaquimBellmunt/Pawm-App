@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">PawmInt</string>
+    <string name="button_text">Request Data</string>
+    <string name="gcm_defaultSenderId">973008279335</string>
+</resources>
