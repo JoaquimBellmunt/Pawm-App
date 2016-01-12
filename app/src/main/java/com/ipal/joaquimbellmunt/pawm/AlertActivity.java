@@ -18,6 +18,12 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ImageButton;
 
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
+
 import com.google.android.gms.common.ConnectionResult;
 
 import com.google.android.gms.common.GoogleApiAvailability;
