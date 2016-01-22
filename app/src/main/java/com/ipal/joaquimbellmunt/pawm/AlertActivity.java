@@ -17,10 +17,24 @@ import com.google.gson.Gson;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
+import com.squareup.okhttp.RequestBody;
 import com.squareup.okhttp.Response;
+import com.squareup.okhttp.ResponseBody;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
@@ -37,10 +51,14 @@ public class AlertActivity extends AppCompatActivity {
     private BroadcastReceiver mBroadcastReceiver;
 
     private Button mButton;
+    private Button m2Button;
+    private Button m3Button;
+    private Button m4Button;
     private ImageButton mimgButton;
     private Gson mGson = new Gson();
     private Socket mSocket;
     private OkHttpClient mClient = new OkHttpClient();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,12 +69,36 @@ public class AlertActivity extends AppCompatActivity {
         setContentView(R.layout.activity_alert);
         mimgButton = (ImageButton) findViewById(R.id.photo);
         mButton = (Button) findViewById(R.id.button);
+        m2Button = (Button) findViewById(R.id.button2);
+        m3Button = (Button) findViewById(R.id.button3);
+        m4Button = (Button) findViewById(R.id.button4);
+        //Http Post
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //sendRequest("http://joaquim.ubismart.org/service/test");
-                sendRequest("https://api.instagram.com/v1/tags/nofilter/media/recent?client_id=ec725a6a49ce4a4686cb2c8a1ed6413f&count=2");
+                sendHttpPost("https://joaquim.ubismart.org/service/test");
+            }
+        });
+        //Socket Emit
+        m2Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 //mSocket.emit("test", "Hello World");
+            }
+        });
+        //Socket Rec
+        m3Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+        //Http Get
+        m4Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //sendRequest("https://joaquim.ubismart.org/service/test");
+                sendHttpGet("https://api.instagram.com/v1/tags/nofilter/media/recent?client_id=ec725a6a49ce4a4686cb2c8a1ed6413f&count=2");
             }
         });
         mimgButton.setOnClickListener(new View.OnClickListener() {
@@ -72,22 +114,6 @@ public class AlertActivity extends AppCompatActivity {
             this.finish();
             return;
         }
-
-        mSocket.on("test", new Emitter.Listener() {
-            @Override
-            public void call(final Object... args) {
-                if (args.length > 0) {
-                    AlertActivity.this.runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            //mAdapter.add((String) args[0]);
-                            //mAdapter.notifyDataSetChanged();
-                            //mListaMensagens.smoothScrollToPosition(mAdapter.getCount() - 1);
-                        }
-                    });
-                }
-            }
-        });
 
         mSocket.connect();
 
@@ -110,7 +136,7 @@ public class AlertActivity extends AppCompatActivity {
         }
     }
 
-    private void sendRequest(String url) {
+    private void sendHttpGet(String url) {
         Request request = new Request.Builder()
                 .url(url)
                 .build();
@@ -121,7 +147,7 @@ public class AlertActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onResponse(Response response) throws IOException {
+            public void onResponse(final Response response) throws IOException {
                 if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
 //                Headers responseHeaders = response.headers();
@@ -130,42 +156,52 @@ public class AlertActivity extends AppCompatActivity {
 //                }
 
                 showResponse(response.body().string());
+
             }
         });
     }
 
-    /**
-     * Check the device to make sure it has the Google Play Services APK. If
-     * it doesn't, display a dialog that allows users to download the APK from
-     * the Google Play Store or enable it in the device's system settings.
-     */
+    private void sendHttpPost(final String url) {
+        Thread thread = new Thread(new Runnable(){
+            @Override
+            public void run(){
+                HttpClient mHttp = new DefaultHttpClient();
+                HttpPost httpPost = new HttpPost(url);
 
-//    private Socket mSocket;
-//
-//    {
-//        try {
-//            mSocket = IO.socket("https://joaquim.ubismart.org/service/test");
-//        } catch (URISyntaxException e) {
-//        }
-//    }
-    private void showResponse(String result) {
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.alert_dialog_title)
-                .setMessage(result)
+                try {
+                    HttpResponse response = mHttp.execute(httpPost);
+                    // write response to log
+                    Log.d("Http Post Response:", response.toString());
+                } catch (ClientProtocolException e) {
+                    // Log exception
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    // Log exception
+                    e.printStackTrace();
+                }
+                //code to do the HTTP request
+            }
+        });
+        thread.start();
+    }
+
+    private void showResponse(final String result) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                new AlertDialog.Builder(AlertActivity.this)
+                        .setTitle(R.string.alert_dialog_title)
+                        .setMessage(result)
 //                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
 //                    public void onClick(DialogInterface dialog, int which) {
 //                        // continue with delete
 //                    }
 //                })
-                .setIcon(android.R.drawable.ic_dialog_alert)
-                .show();
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+            }
+        });
 
-//        runOnUiThread(new Runnable() {
-//            @Override
-//            public void run() {
-//
-//            }
-//        });
     }
 
     private boolean checkPlayServices() {

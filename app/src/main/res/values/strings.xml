@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">PawmInt</string>
-    <string name="button_text">Request Data</string>
+    <string name="HttpPost_button_text">Http Post</string>
+    <string name="HttpGet_button_text">Http Get</string>
+    <string name="SocketEmit_button_text">Socket Emit</string>
+    <string name="SocketRec_button_text">Socket Rec</string>
     <string name="gcm_defaultSenderId">973008279335</string>
     <string name="title_activity_login">Sign in</string>
 
