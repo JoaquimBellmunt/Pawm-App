@@ -14,31 +14,35 @@ import android.widget.ImageButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.gson.Gson;
-import com.squareup.okhttp.Callback;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
-import com.squareup.okhttp.ResponseBody;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import io.socket.client.IO;
 import io.socket.client.Socket;
-import io.socket.emitter.Emitter;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 //import com.github.nkzawa.socketio.client.IO;
 //import com.github.nkzawa.socketio.client.Socket;
@@ -48,6 +52,8 @@ import io.socket.emitter.Emitter;
 public class AlertActivity extends AppCompatActivity {
     private static final String TAG = AlertActivity.class.getSimpleName();
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 1900;
+    private static final long READ_TIMEOUT_MILLIS = 0;
+    private static final long CONNECT_TIMEOUT_MILLIS = 0;
     private BroadcastReceiver mBroadcastReceiver;
 
     private Button mButton;
@@ -57,15 +63,23 @@ public class AlertActivity extends AppCompatActivity {
     private ImageButton mimgButton;
     private Gson mGson = new Gson();
     private Socket mSocket;
-    private OkHttpClient mClient = new OkHttpClient();
+    private OkHttpClient mClient;
+    private Boolean allowUnsafeSsl = true;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        mClient = getUnsafeOkHttpClient();
 
         super.onCreate(savedInstanceState);
         //mSocket.on("new message", onNewMessage);
-        //mSocket.connect();
+        try {
+            mSocket = IO.socket("https://joaquim.ubismart.org");
+        } catch (URISyntaxException e) {
+            this.finish();
+            return;
+        }
+        mSocket.connect();
         setContentView(R.layout.activity_alert);
         mimgButton = (ImageButton) findViewById(R.id.photo);
         mButton = (Button) findViewById(R.id.button);
@@ -83,7 +97,7 @@ public class AlertActivity extends AppCompatActivity {
         m2Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //mSocket.emit("test", "Hello World");
+                mSocket.emit("service/test", "Hello World");
             }
         });
         //Socket Rec
@@ -98,7 +112,8 @@ public class AlertActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //sendRequest("https://joaquim.ubismart.org/service/test");
-                sendHttpGet("https://api.instagram.com/v1/tags/nofilter/media/recent?client_id=ec725a6a49ce4a4686cb2c8a1ed6413f&count=2");
+                sendHttpPost("https://joaquim.ubismart.org/service/test");
+                //sendHttpPost("https://api.instagram.com/v1/tags/nofilter/media/recent?client_id=ec725a6a49ce4a4686cb2c8a1ed6413f&count=2");
             }
         });
         mimgButton.setOnClickListener(new View.OnClickListener() {
@@ -108,12 +123,6 @@ public class AlertActivity extends AppCompatActivity {
             }
         });
 
-        try {
-            mSocket = IO.socket("http://joaquim.ubismart.org");
-        } catch (URISyntaxException e) {
-            this.finish();
-            return;
-        }
 
         mSocket.connect();
 
@@ -136,24 +145,68 @@ public class AlertActivity extends AppCompatActivity {
         }
     }
 
-    private void sendHttpGet(String url) {
+    private OkHttpClient getUnsafeOkHttpClient() {
+        OkHttpClient.Builder builder  = new OkHttpClient.Builder();;
+        try {
+            // Create a trust manager that does not validate certificate chains
+            final TrustManager[] trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+                        }
+
+                        @Override
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return null;
+                        }
+                    }
+            };
+
+            // Install the all-trusting trust manager
+            final SSLContext sslContext;
+
+            sslContext = SSLContext.getInstance("SSL");
+
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            // Create an ssl socket factory with our all-trusting manager
+            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+
+            builder.sslSocketFactory(sslSocketFactory);
+            builder.hostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            });
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
+        }
+
+        return builder.build();
+    }
+
+
+    private void sendHttpPost(String url) {
+        RequestBody formBody = new FormBody.Builder()
+                .add("search", "Jurassic Park")
+                .build();
         Request request = new Request.Builder()
                 .url(url)
+                .post(formBody)
                 .build();
         mClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Request request, IOException throwable) {
-                throwable.printStackTrace();
+            @Override public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
             }
 
-            @Override
-            public void onResponse(final Response response) throws IOException {
+            @Override public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-//                Headers responseHeaders = response.headers();
-//                for (int i = 0; i < responseHeaders.size(); i++) {
-//                    System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
-//                }
 
                 showResponse(response.body().string());
 
@@ -161,29 +214,6 @@ public class AlertActivity extends AppCompatActivity {
         });
     }
 
-    private void sendHttpPost(final String url) {
-        Thread thread = new Thread(new Runnable(){
-            @Override
-            public void run(){
-                HttpClient mHttp = new DefaultHttpClient();
-                HttpPost httpPost = new HttpPost(url);
-
-                try {
-                    HttpResponse response = mHttp.execute(httpPost);
-                    // write response to log
-                    Log.d("Http Post Response:", response.toString());
-                } catch (ClientProtocolException e) {
-                    // Log exception
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // Log exception
-                    e.printStackTrace();
-                }
-                //code to do the HTTP request
-            }
-        });
-        thread.start();
-    }
 
     private void showResponse(final String result) {
         runOnUiThread(new Runnable() {
