@@ -6,6 +6,7 @@
     <string name="SocketRec_button_text">Socket Rec</string>
     <string name="gcm_defaultSenderId">973008279335</string>
     <string name="title_activity_login">Sign in</string>
+    <string name="RegId"></string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>

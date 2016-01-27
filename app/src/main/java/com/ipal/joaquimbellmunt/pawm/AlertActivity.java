@@ -14,28 +14,21 @@ import android.widget.ImageButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.gson.Gson;
+import com.squareup.okhttp.ws.WebSocketCall;
 
-
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 
 import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import io.socket.client.IO;
-import io.socket.client.Socket;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
@@ -43,43 +36,77 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import retrofit.GsonConverterFactory;
+import retrofit.Retrofit;
 
-//import com.github.nkzawa.socketio.client.IO;
-//import com.github.nkzawa.socketio.client.Socket;
-//import com.github.nkzawa.emitter.Emitter;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+
+import java.net.URI;
+import java.util.concurrent.TimeUnit;
+
+
+import com.github.nkzawa.socketio.client.IO;
+import com.github.nkzawa.socketio.client.Socket;
+import com.github.nkzawa.emitter.Emitter;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 public class AlertActivity extends AppCompatActivity {
     private static final String TAG = AlertActivity.class.getSimpleName();
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 1900;
-    private static final long READ_TIMEOUT_MILLIS = 0;
-    private static final long CONNECT_TIMEOUT_MILLIS = 0;
-    private BroadcastReceiver mBroadcastReceiver;
-
     private Button mButton;
     private Button m2Button;
     private Button m3Button;
     private Button m4Button;
     private ImageButton mimgButton;
     private Gson mGson = new Gson();
-    private Socket mSocket;
     private OkHttpClient mClient;
     private Boolean allowUnsafeSsl = true;
+    private Socket mSocket;
+
+    {
+        try {
+            //mSocket = IO.socket("https://joaquim.ubismart.org");
+            mSocket = IO.socket("http://chat.socket.io");
+        } catch (URISyntaxException e) {
+        }
+    }
+
+    private Emitter.Listener onNewMessage = new Emitter.Listener() {
+
+        @Override
+        public void call(final Object... args) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    JSONObject data = (JSONObject) args[0];
+                    String username;
+                    String message;
+                    try {
+                        username = data.getString("username");
+                        message = data.getString("message");
+                    } catch (JSONException e) {
+                        return;
+                    }
+                    showResponse(message);
+                }
+            });
+        }
+    };
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        mClient = getUnsafeOkHttpClient();
-
         super.onCreate(savedInstanceState);
-        //mSocket.on("new message", onNewMessage);
-        try {
-            mSocket = IO.socket("https://joaquim.ubismart.org");
-        } catch (URISyntaxException e) {
-            this.finish();
-            return;
-        }
+
+        mClient = getUnsafeOkHttpClient();
+        mSocket.on("new message", onNewMessage);
         mSocket.connect();
+
         setContentView(R.layout.activity_alert);
         mimgButton = (ImageButton) findViewById(R.id.photo);
         mButton = (Button) findViewById(R.id.button);
@@ -90,14 +117,16 @@ public class AlertActivity extends AppCompatActivity {
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendHttpPost("https://joaquim.ubismart.org/service/test");
+                sendHttp("https://joaquim.ubismart.org/service/test");
             }
         });
         //Socket Emit
         m2Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mSocket.emit("service/test", "Hello World");
+                mSocket.emit("new message", "test");
+                //mSocket.emit("service/test", "test");
+                //sendEmit();
             }
         });
         //Socket Rec
@@ -111,9 +140,7 @@ public class AlertActivity extends AppCompatActivity {
         m4Button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //sendRequest("https://joaquim.ubismart.org/service/test");
-                sendHttpPost("https://joaquim.ubismart.org/service/test");
-                //sendHttpPost("https://api.instagram.com/v1/tags/nofilter/media/recent?client_id=ec725a6a49ce4a4686cb2c8a1ed6413f&count=2");
+                sendHttp("https://joaquim.ubismart.org/service/test");
             }
         });
         mimgButton.setOnClickListener(new View.OnClickListener() {
@@ -122,9 +149,6 @@ public class AlertActivity extends AppCompatActivity {
                 mimgButton.setImageDrawable(null);
             }
         });
-
-
-        mSocket.connect();
 
 
         Bundle bundle = getIntent().getExtras();
@@ -146,7 +170,8 @@ public class AlertActivity extends AppCompatActivity {
     }
 
     private OkHttpClient getUnsafeOkHttpClient() {
-        OkHttpClient.Builder builder  = new OkHttpClient.Builder();;
+        OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        ;
         try {
             // Create a trust manager that does not validate certificate chains
             final TrustManager[] trustAllCerts = new TrustManager[]{
@@ -191,27 +216,33 @@ public class AlertActivity extends AppCompatActivity {
         return builder.build();
     }
 
-
-    private void sendHttpPost(String url) {
+    private void sendHttp(String url) {
         RequestBody formBody = new FormBody.Builder()
-                .add("search", "Jurassic Park")
+                .add("search", String.valueOf(R.string.RegId))
                 .build();
         Request request = new Request.Builder()
                 .url(url)
                 .post(formBody)
                 .build();
         mClient.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(Call call, IOException e) {
+            @Override
+            public void onFailure(Call call, IOException e) {
                 e.printStackTrace();
             }
 
-            @Override public void onResponse(Call call, Response response) throws IOException {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
                 showResponse(response.body().string());
 
             }
         });
+    }
+
+    private void sendEmit() {
+        mSocket.emit("service/test", "test");
+        //mSocket.connect();
     }
 
 
@@ -253,7 +284,7 @@ public class AlertActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        if (mSocket != null)
-            mSocket.disconnect();
+        mSocket.disconnect();
+        //mSocket.off("new message", onNewMessage);
     }
 }
