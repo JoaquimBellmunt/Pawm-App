@@ -3,10 +3,11 @@
     <string name="HttpPost_button_text">Http Post</string>
     <string name="HttpGet_button_text">Http Get</string>
     <string name="SocketEmit_button_text">Socket Emit</string>
-    <string name="SocketRec_button_text">Socket Rec</string>
+    <string name="SocketRec_button_text">Go to memory Activity</string>
     <string name="gcm_defaultSenderId">973008279335</string>
     <string name="title_activity_login">Sign in</string>
-    <string name="RegId"></string>
+
+    <string name="button_send">Send form</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
@@ -21,4 +22,15 @@
         completions."
     </string>
     <string name="alert_dialog_title">Message</string>
+    <string name="not_found">Message</string>
+
+
+    <string name="title_activity_memory">Memory</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="question_1">Question 1</string>
+    <string name="hint_question_1">Hint for question 1</string>
+    <string name="question_2">Question 2</string>
+    <string name="hint_question_2">Hint for question 2</string>
+    <string name="fields_error">Please, enter all answers.</string>
 </resources>

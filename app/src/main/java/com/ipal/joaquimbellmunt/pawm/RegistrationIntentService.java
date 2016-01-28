@@ -7,10 +7,10 @@ import android.util.Log;
 import com.google.android.gms.gcm.GcmPubSub;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.iid.InstanceID;
+import com.pixplicity.easyprefs.library.Prefs;
 
 import java.io.IOException;
 
-import static com.ipal.joaquimbellmunt.pawm.R.string.RegId;
 
 public class RegistrationIntentService extends IntentService {
 
@@ -36,7 +36,7 @@ public class RegistrationIntentService extends IntentService {
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             // [END get_token]
             Log.i(TAG, "GCM Registration Token: " + token);
-            //RegId = Integer.parseInt(token);
+            Prefs.putString("regId", token);
             // TODO: Implement this method to send any registration to your app's servers.
             sendRegistrationToServer(token);
 
