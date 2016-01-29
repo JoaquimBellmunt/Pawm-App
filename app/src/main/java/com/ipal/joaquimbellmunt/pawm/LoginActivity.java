@@ -21,21 +21,40 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.gson.Gson;
+import com.pixplicity.easyprefs.library.Prefs;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 
 /**
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
-
+    private Gson mGson = new Gson();
+    private OkHttpClient mClient = OkClient.getInstance();
     /**
      * A dummy authentication store containing known user names and passwords.
      * TODO: remove after connecting to a real authentication system.
@@ -54,10 +73,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private View mProgressView;
     private View mLoginFormView;
 
+    private Spinner mLocationView;
+    private List<String> list;
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        defaultLocations();
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
@@ -74,6 +102,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             }
         });
 
+        mLocationView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+                Toast.makeText(arg0.getContext(), "Location: " + arg0.getItemAtPosition(arg2).toString(), Toast.LENGTH_SHORT).show();
+                Prefs.putString("Location", arg0.getItemAtPosition(arg2).toString());
+            }
+
+
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+            }
+        });
+
         Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -84,6 +125,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+
+    private void defaultLocations() {
+        mLocationView = (Spinner) findViewById(R.id.location);
+        list = new ArrayList<String>();
+        mLocationView = (Spinner) this.findViewById(R.id.location);
+        list.add("Kitchen");
+        list.add("Bedroom");
+        list.add("Bathroom");
+        ArrayAdapter<String> adaptador = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, list);
+        adaptador.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mLocationView.setAdapter(adaptador);
     }
 
     private void populateAutoComplete() {
@@ -105,9 +161,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView.setError(null);
         mPasswordView.setError(null);
 
+
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
+        String location = Prefs.getString("Locatiom",getString(R.string.not_found));
+
 
         boolean cancel = false;
         View focusView = null;
@@ -138,7 +197,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask = new UserLoginTask(email, password, location);
             mAuthTask.execute((Void) null);
         }
     }
@@ -152,6 +211,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         //TODO: Replace this with your own logic
         return password.length() > 4;
     }
+
 
     /**
      * Shows the progress UI and hides the login form.
@@ -232,6 +292,46 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mEmailView.setAdapter(adapter);
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Login Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.ipal.joaquimbellmunt.pawm/http/host/path")
+        );
+        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        Action viewAction = Action.newAction(
+                Action.TYPE_VIEW, // TODO: choose an action type.
+                "Login Page", // TODO: Define a title for the content shown.
+                // TODO: If you have web page content that matches this app activity's content,
+                // make sure this auto-generated web page URL is correct.
+                // Otherwise, set the URL to null.
+                Uri.parse("http://host/path"),
+                // TODO: Make sure this auto-generated app deep link URI is correct.
+                Uri.parse("android-app://com.ipal.joaquimbellmunt.pawm/http/host/path")
+        );
+        AppIndex.AppIndexApi.end(client, viewAction);
+        client.disconnect();
+    }
+
 
     private interface ProfileQuery {
         String[] PROJECTION = {
@@ -252,14 +352,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         private final String mEmail;
         private final String mPassword;
 
-        UserLoginTask(String email, String password) {
+
+        UserLoginTask(String email, String password, String location) {
             mEmail = email;
             mPassword = password;
+            Prefs.putString("Username", email);
+            Prefs.putString("Password", password);
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
+            sendForm(Prefs.getString("Username", getString(R.string.not_found)), Prefs.getString("Password",getString(R.string.not_found)), Prefs.getString("Location",getString(R.string.not_found)), "https://joaquim.ubismart.org/service/test");
 
             try {
                 // Simulate network access.
@@ -287,7 +390,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             if (success) {
                 finish();
-                Intent myIntent = new Intent(LoginActivity.this,AlertActivity.class);
+                Intent myIntent = new Intent(LoginActivity.this, AlertActivity.class);
                 LoginActivity.this.startActivity(myIntent);
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
@@ -300,6 +403,36 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
         }
+    }
+
+    private void sendForm(String email, String password, String location, String url) {
+
+            Login login = new Login(email, password, location);
+            String json = mGson.toJson(login);
+            String token = Prefs.getString("regId", getString(R.string.not_found));
+            RequestBody formBody = new FormBody.Builder()
+                    .add("regId", token)
+                    .add("json", json)
+                    .build();
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(formBody)
+                    .build();
+            mClient.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    e.printStackTrace();
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (!response.isSuccessful())
+                        throw new IOException("Unexpected code " + response);
+
+                    Utils.showResponse(LoginActivity.this, response.body().string());
+
+                }
+            });
     }
 }
 
