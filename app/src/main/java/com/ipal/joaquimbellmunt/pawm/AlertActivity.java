@@ -99,8 +99,8 @@ public class AlertActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                //mSocket.emit("new message", "{ 'hello': 'world' }");
-
+                Intent intent = new Intent(AlertActivity.this, LoginActivity.class);
+                startActivity(intent);
             }
         });
         //Socket Rec
