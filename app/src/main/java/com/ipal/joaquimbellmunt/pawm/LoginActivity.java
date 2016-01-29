@@ -165,7 +165,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
-        String location = Prefs.getString("Locatiom",getString(R.string.not_found));
+        String location = Prefs.getString("Location",getString(R.string.not_found));
 
 
         boolean cancel = false;
@@ -179,15 +179,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email)) {
-            mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
-            cancel = true;
-        } else if (!isEmailValid(email)) {
-            mEmailView.setError(getString(R.string.error_invalid_email));
-            focusView = mEmailView;
-            cancel = true;
-        }
+//        if (TextUtils.isEmpty(email)) {
+//            mEmailView.setError(getString(R.string.error_field_required));
+//            focusView = mEmailView;
+//            cancel = true;
+//        } else if (!isEmailValid(email)) {
+//            mEmailView.setError(getString(R.string.error_invalid_email));
+//            focusView = mEmailView;
+//            cancel = true;
+//        }
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first
@@ -356,13 +356,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         UserLoginTask(String email, String password, String location) {
             mEmail = email;
             mPassword = password;
+            String shaPassword = Sha1HexUtils.sha1Hex(password);
             Prefs.putString("Username", email);
-            Prefs.putString("Password", password);
+            Prefs.putString("Password", shaPassword);
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            sendForm(Prefs.getString("Username", getString(R.string.not_found)), Prefs.getString("Password",getString(R.string.not_found)), Prefs.getString("Location",getString(R.string.not_found)), "https://joaquim.ubismart.org/service/test");
+            String username= Prefs.getString("Username", getString(R.string.not_found));
+            String password= Prefs.getString("Password", getString(R.string.not_found));
+            String location= Prefs.getString("Location", getString(R.string.not_found));
+            sendForm(username, password, location, "https://joaquim.ubismart.org/service/appLogin");
 
             try {
                 // Simulate network access.
