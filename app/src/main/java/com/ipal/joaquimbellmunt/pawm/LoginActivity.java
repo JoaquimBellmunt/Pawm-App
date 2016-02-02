@@ -3,6 +3,7 @@ package com.ipal.joaquimbellmunt.pawm;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
@@ -56,13 +57,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private Gson mGson = new Gson();
     private OkHttpClient mClient = OkClient.getInstance();
     /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
     private UserLoginTask mAuthTask = null;
@@ -87,8 +81,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         setContentView(R.layout.activity_login);
         defaultLocations();
         // Set up the login form.
-        mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+        mEmailView = (AutoCompleteTextView) findViewById(R.id.username);
         populateAutoComplete();
+        if(!Prefs.getString("Username", "null").equals("null")) {
+            mEmailView.setText(Prefs.getString("Username", getString(R.string.not_found)));
+        }
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -101,6 +98,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 return false;
             }
         });
+        if(!Prefs.getString("Password", "null").equals("null")) {
+            mPasswordView.setText(Prefs.getString("Password", getString(R.string.not_found)));
+        }
 
         mLocationView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -134,9 +134,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         mLocationView = (Spinner) findViewById(R.id.location);
         list = new ArrayList<String>();
         mLocationView = (Spinner) this.findViewById(R.id.location);
-        list.add("Kitchen");
-        list.add("Bedroom");
-        list.add("Bathroom");
+        list.add("kitchen");
+        list.add("bedroom");
+        list.add("bathroom");
         ArrayAdapter<String> adaptador = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, list);
         adaptador.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mLocationView.setAdapter(adaptador);
@@ -165,7 +165,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // Store values at the time of the login attempt.
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
-        String location = Prefs.getString("Location",getString(R.string.not_found));
+        String location = Prefs.getString("Location", getString(R.string.not_found));
 
 
         boolean cancel = false;
@@ -301,7 +301,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         client.connect();
         Action viewAction = Action.newAction(
                 Action.TYPE_VIEW, // TODO: choose an action type.
-                "Login Page", // TODO: Define a title for the content shown.
+                "Welcome to UbiSmart 3.0", // TODO: Define a title for the content shown.
                 // TODO: If you have web page content that matches this app activity's content,
                 // make sure this auto-generated web page URL is correct.
                 // Otherwise, set the URL to null.
@@ -320,7 +320,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         Action viewAction = Action.newAction(
                 Action.TYPE_VIEW, // TODO: choose an action type.
-                "Login Page", // TODO: Define a title for the content shown.
+                "Welcome to UbiSmart 3.0", // TODO: Define a title for the content shown.
                 // TODO: If you have web page content that matches this app activity's content,
                 // make sure this auto-generated web page URL is correct.
                 // Otherwise, set the URL to null.
@@ -358,33 +358,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mPassword = password;
             String shaPassword = Sha1HexUtils.sha1Hex(password);
             Prefs.putString("Username", email);
-            Prefs.putString("Password", shaPassword);
+            Prefs.putString("Password", password);
+            Prefs.putString("ShaPassword", shaPassword);
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String username= Prefs.getString("Username", getString(R.string.not_found));
-            String password= Prefs.getString("Password", getString(R.string.not_found));
-            String location= Prefs.getString("Location", getString(R.string.not_found));
-            sendForm(username, password, location, "https://joaquim.ubismart.org/service/appLogin");
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
-            return true;
+            String username = Prefs.getString("Username", getString(R.string.not_found));
+            String password = Prefs.getString("Password", getString(R.string.not_found));
+            String location = Prefs.getString("Location", getString(R.string.not_found));
+            return sendInfo(username, password, location, "https://joaquim.ubismart.org/service/appLogin");
         }
 
         @Override
@@ -396,9 +379,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 finish();
                 Intent myIntent = new Intent(LoginActivity.this, AlertActivity.class);
                 LoginActivity.this.startActivity(myIntent);
+                Context context = getApplicationContext();
+                CharSequence text = "Acces Granted, Welcome!";
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                Context context = getApplicationContext();
+                CharSequence text = "Acces denied, Please verify your credentials";
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
             }
         }
 
@@ -409,34 +400,32 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    private void sendForm(String email, String password, String location, String url) {
+    private boolean sendInfo(String email, String password, String location, String url) {
 
-            Login login = new Login(email, password, location);
-            String json = mGson.toJson(login);
-            String token = Prefs.getString("regId", getString(R.string.not_found));
-            RequestBody formBody = new FormBody.Builder()
-                    .add("regId", token)
-                    .add("json", json)
-                    .build();
-            Request request = new Request.Builder()
-                    .url(url)
-                    .post(formBody)
-                    .build();
-            mClient.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    e.printStackTrace();
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (!response.isSuccessful())
-                        throw new IOException("Unexpected code " + response);
-
-                    Utils.showResponse(LoginActivity.this, response.body().string());
-
-                }
-            });
+        Login login = new Login(email, password, location);
+        String message = mGson.toJson(login);
+        String token = Prefs.getString("regId", getString(R.string.not_found));
+        RequestBody formBody = new FormBody.Builder()
+                .add("regId", token)
+                .add("json", message)
+                .add("username", email)
+                .add("password", password)
+                .add("location", location)
+                .add("os","Android")
+                .build();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(formBody)
+                .build();
+        try {
+            Response response = mClient.newCall(request).execute();
+            if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+            //Utils.showResponse(LoginActivity.this, response.body().string());
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
 
