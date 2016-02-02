@@ -2,6 +2,7 @@ package com.ipal.joaquimbellmunt.pawm;
 
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -16,14 +17,25 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.gson.Gson;
-import okhttp3.OkHttpClient;
+import com.pixplicity.easyprefs.library.Prefs;
 
+import java.io.IOException;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 
 public class MenuActivity extends AppCompatActivity {
     private static final String TAG = MenuActivity.class.getSimpleName();
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 1900;
-
+    private Button Memory;
+    private Button Logout;
+    private OkHttpClient mClient = OkClient.getInstance();
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -37,7 +49,40 @@ public class MenuActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_menu);
+        Memory = (Button) findViewById(R.id.memory);
+        Logout = (Button) findViewById(R.id.logOut);
 
+
+        Memory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+                Intent intent = new Intent(MenuActivity.this, MemoryActivity.class);
+                startActivity(intent);
+                Context context = getApplicationContext();
+                CharSequence text = "Wellcome to the Memory activity";
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+            }
+        });
+        Logout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Prefs.remove("Username");
+                Prefs.remove("Password");
+                Prefs.remove("Location");
+                sendHttp("https://joaquim.ubismart.org/service/logOut");
+                finish();
+                Intent myIntent = new Intent(MenuActivity.this, LoginActivity.class);
+                MenuActivity.this.startActivity(myIntent);
+                Context context = getApplicationContext();
+                CharSequence text = "You have succefully logout from our server.";
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+            }
+        });
 
         if (checkPlayServices()) {
             Intent intent = new Intent(this, RegistrationIntentService.class);
@@ -46,6 +91,31 @@ public class MenuActivity extends AppCompatActivity {
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
+
+    private void sendHttp(String url) {
+        String regId = Prefs.getString("regId", getString(R.string.not_found));
+        RequestBody formBody = new FormBody.Builder()
+                .add("search", regId)
+                .build();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(formBody)
+                .build();
+        mClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+
+                Utils.showResponse(MenuActivity.this, response.body().string());
+
+            }
+        });
     }
 
 
