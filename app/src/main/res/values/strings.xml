@@ -2,8 +2,9 @@
     <string name="app_name">PawmInt</string>
     <string name="HttpPost_button_text">Http Post</string>
     <string name="HttpGet_button_text">Http Get</string>
-    <string name="SocketEmit_button_text">Go to Login Activity</string>
-    <string name="SocketRec_button_text">Go to memory Activity</string>
+    <string name="login_page">Login page</string>
+    <string name="memory">Memory Activity</string>
+    <string name="menu">Menu</string>
     <string name="gcm_defaultSenderId">973008279335</string>
     <string name="title_activity_login">Sign in</string>
     <string name="button_send">Send form</string>
@@ -24,7 +25,8 @@
     <string name="alert_dialog_title">Message</string>
     <string name="not_found">Message</string>
 
-
+    <string name="ack">Yes</string>
+    <string name="alert">No</string>
     <string name="title_activity_memory">Memory</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
@@ -33,4 +35,5 @@
     <string name="question_2">Question 2</string>
     <string name="hint_question_2">Hint for question 2</string>
     <string name="fields_error">Please, enter all answers.</string>
+    <string name="title_activity_menu">MenuActivity</string>
 </resources>

@@ -29,13 +29,14 @@ public class MyGcmListenerService extends GcmListenerService {
     private void sendNotification(Bundle data) {
         Intent intent = new Intent(this, AlertActivity.class);
         intent.putExtras(data);
+        //this.startActivity(intent);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 123 /* Request code */, intent,
                 PendingIntent.FLAG_ONE_SHOT);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         android.support.v4.app.NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.abc_switch_thumb_material)
+                .setSmallIcon(R.drawable.amupadh_logo)
                 .setContentTitle("Pawn Notification")
                 .setContentText("New Message")
                         .setAutoCancel(true)

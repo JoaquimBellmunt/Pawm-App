@@ -2,12 +2,14 @@ package com.ipal.joaquimbellmunt.pawm;
 
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -37,44 +39,21 @@ import okhttp3.Response;
 public class AlertActivity extends AppCompatActivity {
     private static final String TAG = AlertActivity.class.getSimpleName();
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 1900;
-    private Button mButton;
-    private Button m2Button;
-    private Button m3Button;
-    private Button m4Button;
+    private Button ack;
+    private Button menu;
+    private Button alert;
+    private EditText title, question;
+
     private ImageButton mimgButton;
     private Gson mGson = new Gson();
     private OkHttpClient mClient = OkClient.getInstance();
-    private Boolean allowUnsafeSsl = true;
-    private Socket mSocket;
+
 
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
      */
     private GoogleApiClient client;
-
-    private Emitter.Listener onNewMessage = new Emitter.Listener() {
-
-        @Override
-        public void call(final Object... args) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(AlertActivity.this, "Message", Toast.LENGTH_LONG).show();
-                    JSONObject data = (JSONObject) args[0];
-                    String username;
-                    String message;
-                    try {
-                        username = data.getString("username");
-                        message = data.getString("message");
-                    } catch (JSONException e) {
-                        return;
-                    }
-                    Utils.showResponse(AlertActivity.this, message);
-                }
-            });
-        }
-    };
 
 
     @Override
@@ -83,46 +62,54 @@ public class AlertActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_alert);
         mimgButton = (ImageButton) findViewById(R.id.photo);
-        mButton = (Button) findViewById(R.id.button);
-        m2Button = (Button) findViewById(R.id.button2);
-        m3Button = (Button) findViewById(R.id.button3);
-        m4Button = (Button) findViewById(R.id.button4);
+        ack = (Button) findViewById(R.id.button);
+        menu = (Button) findViewById(R.id.button2);
+        alert = (Button) findViewById(R.id.button3);
+        title = (EditText) findViewById(R.id.textView);
+        question = (EditText) findViewById(R.id.textView2);
+
         //Http Post
-        mButton.setOnClickListener(new View.OnClickListener() {
+        ack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendHttp("https://joaquim.ubismart.org/service/test");
+                sendHttp("https://joaquim.ubismart.org/service/ack");
+                finish();
+                Intent myIntent = new Intent(AlertActivity.this, MenuActivity.class);
+                AlertActivity.this.startActivity(myIntent);
+                Context context = getApplicationContext();
+                CharSequence text = "Thank you for your cooperation";
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
+            }
+        });
+        menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(AlertActivity.this, MenuActivity.class);
+                startActivity(intent);
+            }
+        });
+        alert.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendHttp("https://joaquim.ubismart.org/service/alert");
+                finish();
+                Intent myIntent = new Intent(AlertActivity.this, MenuActivity.class);
+                AlertActivity.this.startActivity(myIntent);
+                Context context = getApplicationContext();
+                CharSequence text = "Help is on his way!";
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();
             }
         });
         //Socket Emit
-        m2Button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
 
-                Intent intent = new Intent(AlertActivity.this, LoginActivity.class);
-                startActivity(intent);
-            }
-        });
-        //Socket Rec
-        m3Button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(AlertActivity.this, MemoryActivity.class);
-                startActivity(intent);
-                //Intent intent = new Intent(AlertActivity.this, MemoryActivity.class);
-            }
-        });
-        //Http Get
-        m4Button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                sendHttp("https://joaquim.ubismart.org/service/test");
-            }
-        });
+
         mimgButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mimgButton.setImageDrawable(null);
             }
         });
 
@@ -132,9 +119,18 @@ public class AlertActivity extends AppCompatActivity {
             Alert alert = mGson.fromJson(bundle.getString("data"), Alert.class);
             if (alert.getServiceName().equals("MedicationReminder")) {
                 mimgButton.setImageResource(R.drawable.medication_reminder);
+                title.setText("Action Reminder: Medication");
+                question.setText("Have you taken your medicin yet?");
             }
             if (alert.getServiceName().equals("WaterReminder")) {
                 mimgButton.setImageResource(R.drawable.water_glass);
+                title.setText("Action Reminder: Hydration");
+                question.setText("Have you drunk anything?");
+            }
+            if (alert.getServiceName().equals("Fall")) {
+                mimgButton.setImageResource(R.drawable.fall);
+                title.setText("Alert: We have detected a FALL!!!");
+                question.setText("Do you need assistance?");
             }
         }
 
@@ -174,12 +170,6 @@ public class AlertActivity extends AppCompatActivity {
     }
 
 
-    private void sendEmit() {
-        mSocket.emit("message", "test");
-
-    }
-
-
     private boolean checkPlayServices() {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
@@ -198,8 +188,6 @@ public class AlertActivity extends AppCompatActivity {
 
     protected void onDestroy() {
         super.onDestroy();
-
-        mSocket.disconnect();
         //mSocket.off("new message", onNewMessage);
     }
 }
