@@ -80,6 +80,17 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         defaultLocations();
+        if (!Prefs.getString("Username", "null").equals("null") && !Prefs.getString("Password", "null").equals("null"))
+        {
+            finish();
+            Intent myIntent = new Intent(LoginActivity.this, MenuActivity.class);
+            LoginActivity.this.startActivity(myIntent);
+            Context context = getApplicationContext();
+            CharSequence text = "Acces Granted, Welcome!";
+            int duration = Toast.LENGTH_SHORT;
+            Toast toast = Toast.makeText(context, text, duration);
+            toast.show();
+        }
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.username);
         populateAutoComplete();
@@ -377,7 +388,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             if (success) {
                 finish();
-                Intent myIntent = new Intent(LoginActivity.this, AlertActivity.class);
+                Intent myIntent = new Intent(LoginActivity.this, MenuActivity.class);
                 LoginActivity.this.startActivity(myIntent);
                 Context context = getApplicationContext();
                 CharSequence text = "Acces Granted, Welcome!";
