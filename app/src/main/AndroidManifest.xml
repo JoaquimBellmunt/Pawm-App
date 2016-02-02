@@ -37,11 +37,6 @@
         <activity
             android:name=".AlertActivity"
             android:screenOrientation="portrait">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <receiver
@@ -76,12 +71,13 @@
 
         <activity
             android:name=".LoginActivity"
-            android:screenOrientation="portrait" />
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name=".MessageActivity" />
         <!--
              ATTENTION: This was auto-generated to add Google Play services to your project for
@@ -95,7 +91,8 @@
             android:name=".MemoryActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_memory"
-            android:theme="@style/FullscreenTheme"></activity>
+            android:theme="@style/FullscreenTheme">
+        </activity>
     </application>
 
 </manifest>
