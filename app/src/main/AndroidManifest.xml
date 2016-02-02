@@ -77,6 +77,11 @@
         <activity
             android:name=".LoginActivity"
             android:screenOrientation="portrait" />
+        <intent-filter>
+            <action android:name="android.intent.action.MAIN" />
+
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
         <activity android:name=".MessageActivity" />
         <!--
              ATTENTION: This was auto-generated to add Google Play services to your project for
