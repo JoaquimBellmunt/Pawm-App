@@ -51,6 +51,7 @@ public class MenuActivity extends AppCompatActivity {
         setContentView(R.layout.activity_menu);
         Memory = (Button) findViewById(R.id.memory);
         Logout = (Button) findViewById(R.id.logOut);
+        Logout.setEnabled(false);
 
 
         Memory.setOnClickListener(new View.OnClickListener() {
@@ -69,18 +70,24 @@ public class MenuActivity extends AppCompatActivity {
         Logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Prefs.remove("Username");
-                Prefs.remove("Password");
-                Prefs.remove("Location");
-                sendHttp("https://joaquim.ubismart.org/service/logOut");
-                finish();
-                Intent myIntent = new Intent(MenuActivity.this, LoginActivity.class);
-                MenuActivity.this.startActivity(myIntent);
-                Context context = getApplicationContext();
-                CharSequence text = "You have succefully logout from our server.";
-                int duration = Toast.LENGTH_SHORT;
-                Toast toast = Toast.makeText(context, text, duration);
-                toast.show();
+                sendLogOut("https://joaquim.ubismart.org/service/appBroker", "logOut",
+                        Prefs.getString("Username", getString(R.string.not_found)),
+                        Prefs.getString("Password", getString(R.string.not_found)),
+                        Prefs.getString("Location", getString(R.string.not_found))
+                );
+
+                    Prefs.remove("Username");
+                    Prefs.remove("Password");
+                    Prefs.remove("Location");
+                    finish();
+                    Intent myIntent = new Intent(MenuActivity.this, LoginActivity.class);
+                    MenuActivity.this.startActivity(myIntent);
+                    Context context = getApplicationContext();
+                    CharSequence text = "You have succefully logout from our server.";
+                    int duration = Toast.LENGTH_SHORT;
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+
             }
         });
 
@@ -93,10 +100,14 @@ public class MenuActivity extends AppCompatActivity {
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    private void sendHttp(String url) {
+    private void sendLogOut(String url, String action, String username, String password, String location) {
         String regId = Prefs.getString("regId", getString(R.string.not_found));
         RequestBody formBody = new FormBody.Builder()
-                .add("search", regId)
+                .add("regId", regId)
+                .add("action", action)
+                .add("username", username)
+                .add("password", password)
+                .add("location", location)
                 .build();
         Request request = new Request.Builder()
                 .url(url)
@@ -111,9 +122,6 @@ public class MenuActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-                Utils.showResponse(MenuActivity.this, response.body().string());
-
             }
         });
     }

@@ -68,11 +68,11 @@ public class AlertActivity extends AppCompatActivity {
         title = (EditText) findViewById(R.id.textView);
         question = (EditText) findViewById(R.id.textView2);
 
-        //Http Post
+
         ack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendHttp("https://joaquim.ubismart.org/service/ack");
+                sendHttp("https://joaquim.ubismart.org/service/appBroker", "appAck");
                 finish();
                 Intent myIntent = new Intent(AlertActivity.this, MenuActivity.class);
                 AlertActivity.this.startActivity(myIntent);
@@ -93,7 +93,7 @@ public class AlertActivity extends AppCompatActivity {
         alert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendHttp("https://joaquim.ubismart.org/service/alert");
+                sendHttp("https://joaquim.ubismart.org/service/appBroker", "appAlert");
                 finish();
                 Intent myIntent = new Intent(AlertActivity.this, MenuActivity.class);
                 AlertActivity.this.startActivity(myIntent);
@@ -104,7 +104,7 @@ public class AlertActivity extends AppCompatActivity {
                 toast.show();
             }
         });
-        //Socket Emit
+
 
 
         mimgButton.setOnClickListener(new View.OnClickListener() {
@@ -144,10 +144,11 @@ public class AlertActivity extends AppCompatActivity {
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    private void sendHttp(String url) {
+    private void sendHttp(String url, String action) {
         String regId = Prefs.getString("regId", getString(R.string.not_found));
         RequestBody formBody = new FormBody.Builder()
                 .add("search", regId)
+                .add ("action", action)
                 .build();
         Request request = new Request.Builder()
                 .url(url)

@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#fbfdfb"
+    android:background="#a1a4a5"
     android:orientation="vertical"
     android:padding="20dp"
     tools:context=".MemoryActivity">
@@ -31,7 +31,7 @@
         android:layout_margin="5dp"
         android:layout_marginTop="20dp"
         android:layout_weight="1"
-        android:text="@string/question_1" />
+        android:text="@string/question_2" />
 
     <EditText
         android:id="@+id/edit_question_2"
@@ -43,13 +43,20 @@
 
 
     <Button
-        android:id="@+id/button_send"
+        android:id="@+id/send_form"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_gravity="center_vertical"
         android:layout_marginTop="5dp"
         android:layout_weight="1"
-        android:onClick="sendMessage"
         android:text="@string/button_send" />
+
+    <Button
+        style="?android:attr/buttonStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Menu"
+        android:id="@+id/menu_memory"
+        android:layout_gravity="center_horizontal" />
 
 </LinearLayout>

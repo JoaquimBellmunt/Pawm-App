@@ -378,7 +378,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             String username = Prefs.getString("Username", getString(R.string.not_found));
             String password = Prefs.getString("Password", getString(R.string.not_found));
             String location = Prefs.getString("Location", getString(R.string.not_found));
-            return sendInfo(username, password, location, "https://joaquim.ubismart.org/service/appLogin");
+            return sendInfo(username, password, location, "https://joaquim.ubismart.org/service/appBroker", "login");
         }
 
         @Override
@@ -411,14 +411,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-    private boolean sendInfo(String email, String password, String location, String url) {
-
-        Login login = new Login(email, password, location);
-        String message = mGson.toJson(login);
-        String token = Prefs.getString("regId", getString(R.string.not_found));
+    private boolean sendInfo(String email, String password, String location, String url, String action) {
+        String regId = Prefs.getString("regId", getString(R.string.not_found));
         RequestBody formBody = new FormBody.Builder()
-                .add("regId", token)
-                .add("json", message)
+                .add("regId", regId)
+                .add("action", action)
                 .add("username", email)
                 .add("password", password)
                 .add("location", location)
