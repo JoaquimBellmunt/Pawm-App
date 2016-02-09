@@ -148,6 +148,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         list.add("kitchen");
         list.add("bedroom");
         list.add("bathroom");
+        list.add("Mobile");
         ArrayAdapter<String> adaptador = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, list);
         adaptador.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mLocationView.setAdapter(adaptador);

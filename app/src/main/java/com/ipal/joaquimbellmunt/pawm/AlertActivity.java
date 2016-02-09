@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.nkzawa.emitter.Emitter;
@@ -42,7 +43,7 @@ public class AlertActivity extends AppCompatActivity {
     private Button ack;
     private Button menu;
     private Button alert;
-    private EditText title, question;
+    private TextView title, question;
 
     private ImageButton mimgButton;
     private Gson mGson = new Gson();
@@ -65,8 +66,8 @@ public class AlertActivity extends AppCompatActivity {
         ack = (Button) findViewById(R.id.button);
         menu = (Button) findViewById(R.id.button2);
         alert = (Button) findViewById(R.id.button3);
-        title = (EditText) findViewById(R.id.textView);
-        question = (EditText) findViewById(R.id.textView2);
+        title = (TextView) findViewById(R.id.textView);
+        question = (TextView) findViewById(R.id.textView2);
 
 
         ack.setOnClickListener(new View.OnClickListener() {
@@ -77,7 +78,7 @@ public class AlertActivity extends AppCompatActivity {
                 Intent myIntent = new Intent(AlertActivity.this, MenuActivity.class);
                 AlertActivity.this.startActivity(myIntent);
                 Context context = getApplicationContext();
-                CharSequence text = "Thank you for your cooperation";
+                CharSequence text = "Help is on his way!";
                 int duration = Toast.LENGTH_SHORT;
                 Toast toast = Toast.makeText(context, text, duration);
                 toast.show();
@@ -98,7 +99,7 @@ public class AlertActivity extends AppCompatActivity {
                 Intent myIntent = new Intent(AlertActivity.this, MenuActivity.class);
                 AlertActivity.this.startActivity(myIntent);
                 Context context = getApplicationContext();
-                CharSequence text = "Help is on his way!";
+                CharSequence text = "Thank you for your cooperation";
                 int duration = Toast.LENGTH_SHORT;
                 Toast toast = Toast.makeText(context, text, duration);
                 toast.show();
@@ -120,16 +121,16 @@ public class AlertActivity extends AppCompatActivity {
             if (alert.getServiceName().equals("MedicationReminder")) {
                 mimgButton.setImageResource(R.drawable.medication_reminder);
                 title.setText("Action Reminder: Medication");
-                question.setText("Have you taken your medicin yet?");
+                question.setText("Have you taken your medicine yet?");
             }
             if (alert.getServiceName().equals("WaterReminder")) {
                 mimgButton.setImageResource(R.drawable.water_glass);
                 title.setText("Action Reminder: Hydration");
                 question.setText("Have you drunk anything?");
             }
-            if (alert.getServiceName().equals("Fall")) {
+            if (alert.getServiceName().equals("FallAlert")) {
                 mimgButton.setImageResource(R.drawable.fall);
-                title.setText("Alert: We have detected a FALL!!!");
+                title.setText("Alert: FALL!!!");
                 question.setText("Do you need assistance?");
             }
         }
@@ -147,8 +148,8 @@ public class AlertActivity extends AppCompatActivity {
     private void sendHttp(String url, String action) {
         String regId = Prefs.getString("regId", getString(R.string.not_found));
         RequestBody formBody = new FormBody.Builder()
-                .add("search", regId)
-                .add ("action", action)
+                .add("regId", regId)
+                .add("action", action)
                 .build();
         Request request = new Request.Builder()
                 .url(url)
