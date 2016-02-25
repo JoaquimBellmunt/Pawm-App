@@ -190,6 +190,21 @@ public class AlertActivity extends AppCompatActivity {
 
     protected void onDestroy() {
         super.onDestroy();
-        //mSocket.off("new message", onNewMessage);
+        PawnIntApplication.activityDestroyed();
+    }
+
+    public void onStop() {
+        super.onStop();
+        PawnIntApplication.activitySttoped();
+    }
+
+    public void onResume() {
+        super.onResume();
+        PawnIntApplication.activityResumed();
+    }
+
+    public void onPause() {
+        super.onPause();
+        PawnIntApplication.activityPaused();
     }
 }

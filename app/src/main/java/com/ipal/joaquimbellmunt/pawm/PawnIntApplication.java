@@ -16,4 +16,26 @@ public class PawnIntApplication extends Application {
                 .setUseDefaultSharedPreference(true)
                 .build();
     }
+
+    public static boolean isActivityVisible() {
+        return activityVisible;
+    }
+
+    public static void activityResumed() {
+        activityVisible = true;
+    }
+
+    public static void activityPaused() {
+        activityVisible = false;
+    }
+
+    public static void activityDestroyed() {
+        activityVisible = false;
+    }
+
+    public static void activitySttoped() {
+        activityVisible = false;
+    }
+
+    private static boolean activityVisible;
 }

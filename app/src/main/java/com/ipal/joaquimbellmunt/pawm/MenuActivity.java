@@ -51,7 +51,7 @@ public class MenuActivity extends AppCompatActivity {
         setContentView(R.layout.activity_menu);
         Memory = (Button) findViewById(R.id.memory);
         Logout = (Button) findViewById(R.id.logOut);
-        Logout.setEnabled(false);
+        //Logout.setEnabled(false);
 
 
         Memory.setOnClickListener(new View.OnClickListener() {
@@ -143,9 +143,24 @@ public class MenuActivity extends AppCompatActivity {
         }
         return true;
     }
+    protected void onResume() {
+        super.onResume();
+        PawnIntApplication.activityResumed();
+    }
 
     protected void onDestroy() {
         super.onDestroy();
+        PawnIntApplication.activityDestroyed();
+    }
+
+    public void onStop() {
+        super.onStop();
+        PawnIntApplication.activitySttoped();
+    }
+
+    public void onPause() {
+        super.onPause();
+        PawnIntApplication.activityPaused();
     }
 }
 

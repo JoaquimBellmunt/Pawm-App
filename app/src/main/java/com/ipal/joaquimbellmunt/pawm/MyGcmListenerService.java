@@ -1,6 +1,7 @@
 package com.ipal.joaquimbellmunt.pawm;
 
 
+import android.app.ActivityManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.util.Log;
 
 
 import com.google.android.gms.gcm.GcmListenerService;
+import com.pixplicity.easyprefs.library.Prefs;
 
 public class MyGcmListenerService extends GcmListenerService {
     public static String MESSAGE = "message";
@@ -23,7 +25,12 @@ public class MyGcmListenerService extends GcmListenerService {
 
     public void onMessageReceived(String from, Bundle data) {
         Log.d(TAG, "From: " + from);
-        sendNotification(data);
+        if (PawnIntApplication.isActivityVisible()) {
+            Intent intent = new Intent(this, AlertActivity.class);
+            intent.putExtras(data);
+        } else {
+            sendNotification(data);
+        }
     }
 
     private void sendNotification(Bundle data) {

@@ -324,9 +324,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         AppIndex.AppIndexApi.start(client, viewAction);
     }
 
+    public void onPause() {
+        super.onPause();
+        PawnIntApplication.activityPaused();
+    }
+
+
     @Override
     public void onStop() {
         super.onStop();
+
+        PawnIntApplication.activitySttoped();
+
 
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -410,6 +419,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
         }
+
+
+
     }
 
     private boolean sendInfo(String email, String password, String location, String url, String action) {

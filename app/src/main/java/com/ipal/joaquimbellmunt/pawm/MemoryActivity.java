@@ -34,7 +34,6 @@ public class MemoryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_memory);
-
         mQuestion1EditText = (EditText) findViewById(R.id.edit_question_1);
         mQuestion2EditText = (EditText) findViewById(R.id.edit_question_1);
         send_form = (Button) findViewById(R.id.send_form);
@@ -61,6 +60,11 @@ public class MemoryActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    protected void onResume() {
+        super.onResume();
+        PawnIntApplication.activityResumed();
     }
 
     private void sendForm(String url, String action) {
@@ -96,6 +100,16 @@ public class MemoryActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, getString(R.string.fields_error), Toast.LENGTH_LONG).show();
         }
+    }
+
+    public void onStop() {
+        super.onStop();
+        PawnIntApplication.activitySttoped();
+    }
+
+    public void onPause() {
+        super.onPause();
+        PawnIntApplication.activityPaused();
     }
 
     private boolean validateFields() {
