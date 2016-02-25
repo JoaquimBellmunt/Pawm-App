@@ -385,9 +385,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            String username = Prefs.getString("Username", getString(R.string.not_found));
-            String password = Prefs.getString("Password", getString(R.string.not_found));
-            String location = Prefs.getString("Location", getString(R.string.not_found));
+            String username = Prefs.getString("Username", null);
+            String password = Prefs.getString("Password", null);
+            String location = Prefs.getString("Location", null);
             return sendInfo(username, password, location, "https://joaquim.ubismart.org/service/appBroker", "login");
         }
 
@@ -425,7 +425,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private boolean sendInfo(String email, String password, String location, String url, String action) {
-        String regId = Prefs.getString("regId", getString(R.string.not_found));
+        String regId = Prefs.getString("regId",null);
         RequestBody formBody = new FormBody.Builder()
                 .add("regId", regId)
                 .add("action", action)

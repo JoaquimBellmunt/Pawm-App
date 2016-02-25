@@ -24,10 +24,11 @@ public class MyGcmListenerService extends GcmListenerService {
     //private GCMNotificationIntentService mGCMNotif = new GCMNotificationIntentService();
 
     public void onMessageReceived(String from, Bundle data) {
-        Log.d(TAG, "From: " + from);
         if (PawnIntApplication.isActivityVisible()) {
             Intent intent = new Intent(this, AlertActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putExtras(data);
+            this.startActivity(intent);
         } else {
             sendNotification(data);
         }
