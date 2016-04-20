@@ -388,7 +388,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             String username = Prefs.getString("Username", null);
             String password = Prefs.getString("Password", null);
             String location = Prefs.getString("Location", null);
-            return sendInfo(username, password, location, "https://joaquim.ubismart.org/service/appBroker", "login");
+            return sendInfo(username, password, location, "https://demo.ubismart.org/service/appBroker", "login");
         }
 
         @Override

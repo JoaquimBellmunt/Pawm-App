@@ -42,7 +42,7 @@ public class MemoryActivity extends AppCompatActivity {
 
         send_form.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                sendForm("https://joaquim.ubismart.org/service/appBroker", "form");
+                sendForm("https://demo.ubismart.org/service/appBroker", "form");
                 finish();
                 Intent myIntent = new Intent(MemoryActivity.this, MenuActivity.class);
                 MemoryActivity.this.startActivity(myIntent);

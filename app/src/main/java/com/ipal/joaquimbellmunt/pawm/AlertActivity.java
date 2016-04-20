@@ -73,7 +73,7 @@ public class AlertActivity extends AppCompatActivity {
         ack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendHttp("https://joaquim.ubismart.org/service/appBroker", "appAck");
+                sendHttp("https://demo.ubismart.org/service/appBroker", "appAck");
                 finish();
                 Intent myIntent = new Intent(AlertActivity.this, MenuActivity.class);
                 AlertActivity.this.startActivity(myIntent);
@@ -94,7 +94,7 @@ public class AlertActivity extends AppCompatActivity {
         alert.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendHttp("https://joaquim.ubismart.org/service/appBroker", "appAlert");
+                sendHttp("https://demo.ubismart.org/service/appBroker", "appAlert");
                 finish();
                 Intent myIntent = new Intent(AlertActivity.this, MenuActivity.class);
                 AlertActivity.this.startActivity(myIntent);

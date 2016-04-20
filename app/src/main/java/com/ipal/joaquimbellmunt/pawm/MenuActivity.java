@@ -70,7 +70,7 @@ public class MenuActivity extends AppCompatActivity {
         Logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendLogOut("https://joaquim.ubismart.org/service/appBroker", "logOut",
+                sendLogOut("https://demo.ubismart.org/service/appBroker", "logOut",
                         Prefs.getString("Username", getString(R.string.not_found)),
                         Prefs.getString("Password", getString(R.string.not_found)),
                         Prefs.getString("Location", getString(R.string.not_found))
