@@ -387,8 +387,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         protected Boolean doInBackground(Void... params) {
             String username = Prefs.getString("Username", null);
             String password = Prefs.getString("Password", null);
-            String location = Prefs.getString("Location", null);
-            return sendInfo(username, password, location, "https://demo.ubismart.org/service/appBroker", "login");
+           // String location = Prefs.getString("Location", null);
+            return sendInfo(username, password, "https://demo.ubismart.org/service/appBroker", "login");
         }
 
         @Override
@@ -424,14 +424,14 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     }
 
-    private boolean sendInfo(String email, String password, String location, String url, String action) {
+    private boolean sendInfo(String email, String password, String url, String action) {
         String regId = Prefs.getString("regId",null);
         RequestBody formBody = new FormBody.Builder()
                 .add("regId", regId)
                 .add("action", action)
                 .add("username", email)
                 .add("password", password)
-                .add("location", location)
+                //.add("location", location)
                 .add("os","Android")
                 .build();
         Request request = new Request.Builder()

@@ -36,4 +36,5 @@
     <string name="hint_question_2">Hint for question 2</string>
     <string name="fields_error">Please, enter all answers.</string>
     <string name="title_activity_menu">MenuActivity</string>
+    <string name="title_activity_register">RegisterActivity</string>
 </resources>
